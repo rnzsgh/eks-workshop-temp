@@ -1,0 +1,7 @@
+
+
+*.swp
+main
+eks-workshop-temp
+*.zip
+vendor

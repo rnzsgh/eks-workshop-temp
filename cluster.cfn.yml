@@ -1,0 +1,169 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: EKSWS VPC
+
+
+Parameters:
+
+  VpcStackName:
+    Type: String
+
+  AdminRoleArn:
+    Type: String
+
+Resources:
+
+  EcrDockerRepository:
+    Type: AWS::ECR::Repository
+
+  CodePipelineArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - eks:Describe*
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ecr:GetAuthorizationToken
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcs
+                  - ec2:CreateNetworkInterfacePermission
+              - Resource: !Sub arn:aws:s3:::${CodePipelineArtifactBucket}/*
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+              - Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrDockerRepository}
+                Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - ec2.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+  ClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+  ClusterControlPlaneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for the EKS control plane
+      VpcId:
+        Fn::ImportValue: !Sub ${VpcStackName}-VpcID
+
+  Cluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Version: "1.10"
+      RoleArn: !GetAtt ClusterRole.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref ClusterControlPlaneSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PublicSubnet1ID
+          - Fn::ImportValue: !Sub ${VpcStackName}-PublicSubnet2ID
+
+
+Outputs:
+
+  NodeInstanceRoleArn:
+    Value: !GetAtt NodeInstanceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRoleArn
+
+  NodeInstanceRoleId:
+    Value: !GetAtt NodeInstanceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRoleId
+
+  ClusterName:
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterName
+
+  ClusterArn:
+    Value: !GetAtt Cluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterArn
+
+  ClusterEndpoint:
+    Value: !GetAtt Cluster.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterEndpoint
+
+  ClusterControlPlaneSecurityGroup:
+    Value: !Ref ClusterControlPlaneSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterControlPlaneSecurityGroup
+
+  CodeBuildServiceRoleArn:
+    Value: !GetAtt CodeBuildServiceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodeBuildServiceRoleArn
+
+
