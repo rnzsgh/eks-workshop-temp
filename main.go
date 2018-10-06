@@ -38,8 +38,10 @@ func handler(ctx context.Context, event cfn.Event) (physicalResourceID string, d
 
 	data = map[string]interface{}{}
 
-	if err = createAwsAuthConfigMap(event); err != nil {
-		log.Error(err, "Unable to create aws-auth ConfigMap")
+	if event.RequestType == "Create" {
+		if err = createAwsAuthConfigMap(event); err != nil {
+			log.Error(err, "Unable to create aws-auth ConfigMap")
+		}
 	}
 
 	return
