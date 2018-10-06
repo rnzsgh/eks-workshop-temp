@@ -39,6 +39,17 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:UploadArchive
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:CancelUploadArchive
+                  - iam:PassRole
               - Resource: !Sub arn:aws:s3:::${CodePipelineArtifactBucket}/*
                 Effect: Allow
                 Action:
@@ -226,6 +237,18 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-CodePipelineServiceRoleId
 
+  EcrDockerRepositoryArn:
+    Value: !GetAtt EcrDockerRepository.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryArn
 
+  EcrDockerRepositoryName:
+    Value: !Ref EcrDockerRepository
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryName
 
+  EcrDockerRepositoryUri:
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EcrDockerRepository}
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryUri
 
