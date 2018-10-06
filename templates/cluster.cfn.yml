@@ -12,13 +12,16 @@ Parameters:
   AdminRoleArn:
     Type: String
 
+
 Resources:
 
   EcrDockerRepository:
     Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
 
   CodePipelineArtifactBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
 
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
@@ -62,18 +65,18 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Resource: *
+              - Resource: '*'
                 Effect: Allow
                 Action:
                   - eks:Describe*
-              - Resource: *
+              - Resource: '*'
                 Effect: Allow
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - ecr:GetAuthorizationToken
-              - Resource: *
+              - Resource: '*'
                 Effect: Allow
                 Action:
                   - ec2:CreateNetworkInterface
@@ -104,7 +107,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - eks:Describe
-              - Resource: *
+              - Resource: '*'
                 Effect: Allow
                 Action:
                   - sts:GetFederationToken
@@ -152,7 +155,6 @@ Resources:
   Cluster:
     Type: AWS::EKS::Cluster
     Properties:
-      Version: 1.10
       RoleArn: !GetAtt ClusterRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
