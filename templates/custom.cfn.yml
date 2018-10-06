@@ -4,6 +4,9 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
 
+  VpcStackName:
+    Type: String
+
   ClusterStackName:
     Type: String
 
@@ -16,6 +19,27 @@ Parameters:
   LambdaBucket:
     Type: String
 
+  GitSourceRepo:
+    Type: String
+    Description: CodeCommit or GitHub source repository - must contain a Dockerfile in the base
+
+  GitBranch:
+    Type: String
+    Default: master
+    Description: CodeCommit or GitHub git repository branch - change triggers a new build
+
+  GitHubToken:
+    Type: String
+    NoEcho: true
+    Description: "GitHub API token - see: https://github.com/blog/1509-personal-api-tokens"
+
+  GitHubUser:
+    Type: String
+    Description: GitHub username or organization - leave blank if using CodeCommit
+
+  CodeBuildDockerImage:
+    Type: String
+    Default: aws/codebuild/docker:17.09.0
 
 Resources:
 
@@ -48,5 +72,87 @@ Resources:
     DependsOn:
       - AwsAuthConfigMapConfigCustomResourceLambda
 
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: !Ref CodeBuildDockerImage
+        EnvironmentVariables:
+          - Name: REPOSITORY_URI
+            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EcrDockerRepository}
+          - Name: REPOSITORY_NAME
+            Value: !Ref GitSourceRepo
+          - Name: REPOSITORY_BRANCH
+            Value: !Ref GitBranch
+          - Name: EKS_CLUSTER_NAME
+            Value:
+              Fn::ImportValue: !Sub ${ClusterStackName}-ClusterName
+      Name: !Ref AWS::StackName
+      ServiceRole:
+        Fn::ImportValue: !Sub ${ClusterStackName}-CodeBuildServiceRoleArn
+      VpcConfig:
+        VpcId:
+          Fn::ImportValue: !Sub ${VpcStackName}-VpcID
+        Subnets:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnet1ID
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnet2ID
+        SecurityGroupIds:
+          - !Ref CodeBuildSecurityGroup
 
+  CodeBuildSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for CodeBuild
+      VpcId:
+        Fn::ImportValue: !Sub ${VpcStackName}-VpcID
 
+  CodePipelineGitHub:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn:
+        Fn::ImportValue: !Sub ${ClusterStackName}-CodePipelineServiceRoleArn
+      ArtifactStore:
+        Type: S3
+        Location:
+          Fn::ImportValue: !Sub ${ClusterStackName}-CodePipelineArtifactBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: App
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              Configuration:
+                Owner: !Ref GitHubUser
+                Repo: !Ref GitSourceRepo
+                Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
+              OutputArtifacts:
+                - Name: App
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 1
+    DependsOn:
+      - AwsAuthConfigMapConfigCustomResource
+      - CodeBuildProject
