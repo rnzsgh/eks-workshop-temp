@@ -62,18 +62,18 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Resource: "*"
+              - Resource: *
                 Effect: Allow
                 Action:
                   - eks:Describe*
-              - Resource: "*"
+              - Resource: *
                 Effect: Allow
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - ecr:GetAuthorizationToken
-              - Resource: "*"
+              - Resource: *
                 Effect: Allow
                 Action:
                   - ec2:CreateNetworkInterface
@@ -198,5 +198,32 @@ Outputs:
     Value: !GetAtt CodeBuildServiceRole.Arn
     Export:
       Name: !Sub ${AWS::StackName}-CodeBuildServiceRoleArn
+
+  CodeBuildServiceRoleId:
+    Value: !GetAtt CodeBuildServiceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-CodeBuildServiceRoleId
+
+  CodePipelineArtifactBucketName:
+    Value: !Ref CodePipelineArtifactBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineArtifactBucketName
+
+  CodePipelineArtifactBucketArn:
+    Value: !GetAtt CodePipelineArtifactBucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineArtifactBucketArn
+
+  CodePipelineServiceRoleArn:
+    Value: !GetAtt CodePipelineServiceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineServiceRoleArn
+
+  CodePipelineServiceRoleId:
+    Value: !GetAtt CodePipelineServiceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineServiceRoleId
+
+
 
 
