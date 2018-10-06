@@ -41,6 +41,7 @@ Parameters:
     Type: String
     Default: aws/codebuild/docker:17.09.0
 
+
 Resources:
 
   AwsAuthConfigMapConfigCustomResourceLambda:
@@ -85,7 +86,8 @@ Resources:
         Image: !Ref CodeBuildDockerImage
         EnvironmentVariables:
           - Name: REPOSITORY_URI
-            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EcrDockerRepository}
+            Value:
+              Fn::ImportValue: !Sub ${ClusterStackName}-EcrDockerRepositoryUri
           - Name: REPOSITORY_NAME
             Value: !Ref GitSourceRepo
           - Name: REPOSITORY_BRANCH
@@ -120,7 +122,7 @@ Resources:
       ArtifactStore:
         Type: S3
         Location:
-          Fn::ImportValue: !Sub ${ClusterStackName}-CodePipelineArtifactBucket
+          Fn::ImportValue: !Sub ${ClusterStackName}-CodePipelineArtifactBucketName
       Stages:
         - Name: Source
           Actions:
