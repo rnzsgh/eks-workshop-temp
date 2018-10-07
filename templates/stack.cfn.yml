@@ -204,10 +204,16 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref PublicRouteTable
 
-  PublicSubnetRouteTableAssociation1:
-    Type: AWS::EC2::SubnetRouteTableAssociation
+  PublicSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
+
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
 
   PublicSubnetNetworkAclAssociation2:
@@ -216,20 +222,14 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
 
-  PublicSubnetNetworkAclAssociation2:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnet2
-      NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
-
-  PublicSubnetNetworkAclAssociation3:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
+  PublicSubnetRouteTableAssociation3:
+    Type: AWS::EC3::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet3
-      NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
+      RouteTableId: !Ref PublicRouteTable
 
   PublicSubnetNetworkAclAssociation3:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Type: AWS::EC3::SubnetNetworkAclAssociation
     Properties:
       SubnetId: !Ref PublicSubnet3
       NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
