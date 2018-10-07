@@ -289,6 +289,9 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+              - Resource: '*'
+                Effect: Allow
+                Action:
                   - ecr:GetAuthorizationToken
               - Resource: '*'
                 Effect: Allow
@@ -321,10 +324,6 @@ Resources:
                 Effect: Allow
                 Action:
                   - eks:Describe
-              - Resource: '*'
-                Effect: Allow
-                Action:
-                  - sts:GetFederationToken
 
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -348,12 +347,6 @@ Resources:
             Value: !Ref Cluster
       Name: !Ref AWS::StackName
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-
-  CodeBuildSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security Group for CodeBuild
-      VpcId: !Ref Vpc
 
   CodePipelineGitHub:
     Type: AWS::CodePipeline::Pipeline
