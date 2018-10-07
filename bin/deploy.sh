@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -Rf handler.zip main  eks-workshop-temp
+
 BUCKET_NAME=eks-workshop-lambda
 GOOS=linux go build main.go
 
