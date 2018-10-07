@@ -223,13 +223,13 @@ Resources:
       NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
 
   PublicSubnetRouteTableAssociation3:
-    Type: AWS::EC3::SubnetRouteTableAssociation
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet3
       RouteTableId: !Ref PublicRouteTable
 
   PublicSubnetNetworkAclAssociation3:
-    Type: AWS::EC3::SubnetNetworkAclAssociation
+    Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       SubnetId: !Ref PublicSubnet3
       NetworkAclId: !GetAtt Vpc.DefaultNetworkAcl
