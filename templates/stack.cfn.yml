@@ -442,6 +442,9 @@ Resources:
     DependsOn:
       - ClusterRole
       - ClusterControlPlaneSecurityGroup
+      - PublicSubnetRouteTableAssociation1
+      - PublicSubnetRouteTableAssociation2
+      - PublicSubnetRouteTableAssociation3
 
   AwsAuthConfigMapConfigCustomResourceLambda:
     Type: AWS::Lambda::Function
