@@ -2,7 +2,7 @@
 
 # Usage: bin/create.sh GITHUB_TOKEN_ID
 
-STACK_NAME=eksw-0
+STACK_NAME=$1
 
 # ##############################################################################
 # Location
@@ -41,7 +41,7 @@ GIT_BRANCH=master
 GITHUB_USER=rnzsgh
 
 # Credentials for a user who has permission in GitHub organization.
-GITHUB_TOKEN=$1
+GITHUB_TOKEN=$2
 
 # ##############################################################################
 
