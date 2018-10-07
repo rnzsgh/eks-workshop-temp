@@ -584,13 +584,14 @@ Resources:
 
   ClusterControlPlaneSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: NodeSecurityGroup
     Properties:
       Description: Allow pods to communicate with the cluster API Server
       GroupId: !Ref ClusterControlPlaneSecurityGroup
       SourceSecurityGroupId: !Ref NodeSecurityGroup
       IpProtocol: tcp
       ToPort: 443
+      FromPort: 443
+    DependsOn: NodeSecurityGroup
 
   NodeGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
