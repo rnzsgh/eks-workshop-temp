@@ -423,6 +423,8 @@ Resources:
     DependsOn:
       - AwsAuthConfigMapConfigCustomResource
       - CodeBuildProject
+      - Cluster
+      - NodeGroup
 
   # EKS Cluster ----------------------------------------------------------------
 
@@ -677,4 +679,78 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-PublicSubnet3Id
 
+  NodeInstanceRoleArn:
+    Value: !GetAtt NodeInstanceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRoleArn
+
+  NodeInstanceRoleId:
+    Value: !GetAtt NodeInstanceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRoleId
+
+  ClusterName:
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterName
+
+  ClusterArn:
+    Value: !GetAtt Cluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterArn
+
+  ClusterEndpoint:
+    Value: !GetAtt Cluster.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterEndpoint
+
+  ClusterControlPlaneSecurityGroup:
+    Value: !Ref ClusterControlPlaneSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterControlPlaneSecurityGroup
+
+  CodeBuildServiceRoleArn:
+    Value: !GetAtt CodeBuildServiceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodeBuildServiceRoleArn
+
+  CodeBuildServiceRoleId:
+    Value: !GetAtt CodeBuildServiceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-CodeBuildServiceRoleId
+
+  CodePipelineArtifactBucketName:
+    Value: !Ref CodePipelineArtifactBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineArtifactBucketName
+
+  CodePipelineArtifactBucketArn:
+    Value: !GetAtt CodePipelineArtifactBucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineArtifactBucketArn
+
+  CodePipelineServiceRoleArn:
+    Value: !GetAtt CodePipelineServiceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineServiceRoleArn
+
+  CodePipelineServiceRoleId:
+    Value: !GetAtt CodePipelineServiceRole.RoleId
+    Export:
+      Name: !Sub ${AWS::StackName}-CodePipelineServiceRoleId
+
+  EcrDockerRepositoryArn:
+    Value: !GetAtt EcrDockerRepository.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryArn
+
+  EcrDockerRepositoryName:
+    Value: !Ref EcrDockerRepository
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryName
+
+  EcrDockerRepositoryUri:
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EcrDockerRepository}
+    Export:
+      Name: !Sub ${AWS::StackName}-EcrDockerRepositoryUri
 
