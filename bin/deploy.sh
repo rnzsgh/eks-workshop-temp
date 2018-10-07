@@ -1,6 +1,5 @@
 #!/bin/bash
 
-cd ..
 BUCKET_NAME=eks-workshop-lambda
 GOOS=linux go build main.go
 
