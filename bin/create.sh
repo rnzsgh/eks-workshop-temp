@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: bin/create.sh GITHUB_TOKEN_ID
+# Usage: bin/create.sh STACK_NAME GITHUB_TOKEN_ID
 
 STACK_NAME=$1
 
